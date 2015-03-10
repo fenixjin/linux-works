@@ -16,6 +16,53 @@
 	printf(":%s\n", strerror(errno))
 
 inline int cp_rw(int srcfd, int dstfd);
+
+int main (int argc, char **argv)
+{
+	char buf[8192];
+	int srcfd, dstfd;
+	clock_t start, end;
+	struct tms stm, ntm;
+	struct stat filestat;
+	int tck;
+	char cmdline[30];
+
+	if (argc != 3)
+		printf("Usage: cmd <src> <dst>");
+
+	tck = sysconf(_SC_CLK_TCK);
+
+	start = times(&stm);
+	if((srcfd = open(argc[1], O_RDONLY)) == -1)
+	{
+		error("open %s, error", argv[1]);
+		exit(0);
+	}
+	if((dstfd = open(argv[2], O_RDWR | O_CREAT | O_TRUNC, 0666)) == -1)
+	{
+		error("creat %s error", argv[2]);
+		exit(0);
+	}
+
+	fstat(srcfd, &filestat);
+	if(lseek(dstfd, filestat.st_size, SEEK_SET) == -1)
+	{
+		error("lseek error");
+		exit(0);
+	}
+	if(write(dstfd, " ", 1) != 1)
+	{
+		error("write error");
+		exit(0);
+	}
+	cp_map(srcfd, dstfd, filestat.st_size);
+	close(srcfd);
+	close(dstfd);
+	end = times(&ntm);
+	printf("weqweqweqweqweqwe");
+	sprintf(cmdline, "rm -f %s", argv[2]);
+	system(cmdline);
+}
 inline int cp_rw(int srcfd, int dstfd, char *buf, int len)
 {
 	int nread;
