@@ -36,6 +36,11 @@ int main (int argc, char *argv[])
 	gtk_widget_show(window);
 	gtk_signal_connect(GTK_OBJECT(window), "destroy", GTK_SIGNAL_FUNC(gtk_main_quit), NULL);
 	table = gtk_table_new(5, 11, TRUE);
-	
+	gtk_widget_show(table);
+	gtk_container_add(GTK_TABLE(window), progress_bar, 0, 11, 1,2);
+	gtk_widget_show(progress_bar);
+	timer - gtk_timeout_add(150, progress_timeout, data);
 
+	gtk_main();
+	return 0;
 }
