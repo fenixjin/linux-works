@@ -1,83 +1,63 @@
 /*This program is about using system call to copy a file*/
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <sys/nman.h>
-#inlcude <unistd.h>
-#inlcude <sys/types.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/times.h>
 
-#define error(fmt, args...)\
-	printf(fmt,  ##args);\
-	printf(":%s\n", strerror(errno))
-
-inline int cp_rw(int srcfd, int dstfd);
+#define BUF_SIZE 1024
 
 int main (int argc, char **argv)
 {
-	char buf[8192];
-	int srcfd, dstfd;
-	clock_t start, end;
-	struct tms stm, ntm;
-	struct stat filestat;
-	int tck;
+	char buf[BUF_SIZE];
+	int src, dst;
+	int read_bytes, written_bytes;
+	char *postion
 	char cmdline[30];
 
 	if (argc != 3)
-		printf("Usage: cmd <src> <dst>");
+		printf("Usage: cmd <src> ++<dst>");
 
-	tck = sysconf(_SC_CLK_TCK);
+	if((src = open(argc[1], O_RDONLY)) == -1)		//open as a read-only
+	{
+		fprintf(stderr, "open %s, error", argv[1]);
+		exit(0);
+	}
+	if((dst = open(argv[2], O_RDWR | O_CREAT | O_TRUNC, 0666)) == -1)	//open as both read and write possible
+	{																	//create the file if it does not exist
+																		//cut the length of the file to zero
+																		//default access right is 0666
+		fprintf(stderr, "creat %s error", argv[2]);
+		exit(0);
+	}
 
-	start = times(&stm);
-	if((srcfd = open(argc[1], O_RDONLY)) == -1)
+	while (read_bytes = read(src, buffer, BUF_SIZE))
 	{
-		error("open %s, error", argv[1]);
-		exit(0);
-	}
-	if((dstfd = open(argv[2], O_RDWR | O_CREAT | O_TRUNC, 0666)) == -1)
-	{
-		error("creat %s error", argv[2]);
-		exit(0);
-	}
-
-	fstat(srcfd, &filestat);
-	if(lseek(dstfd, filestat.st_size, SEEK_SET) == -1)
-	{
-		error("lseek error");
-		exit(0);
-	}
-	if(write(dstfd, " ", 1) != 1)
-	{
-		error("write error");
-		exit(0);
-	}
-	cp_map(srcfd, dstfd, filestat.st_size);
-	close(srcfd);
-	close(dstfd);
-	end = times(&ntm);
-	printf("weqweqweqweqweqwe");
-	sprintf(cmdline, "rm -f %s", argv[2]);
-	system(cmdline);
-}
-inline int cp_rw(int srcfd, int dstfd, char *buf, int len)
-{
-	int nread;
-	while （nread = read(srcfd, buf len) > 0）
-	{
-		if (write(dstfd, buf, nread) != nread)
+		if((read_bytes == -1) && (errno != EINTR))						//EINTR means an interrupt request
+			break;
+		else if(read_bytes > 0)
 		{
-			error("write error");
-			return -1;
+			ptr = buffer;
+			while(written_bytes = write(dst, ptr, read_bytes))
+			{
+				if((written_bytes == -1) && (errno != EINTR))		
+					break;
+				else if(written_bytes == read_bytes)
+					break;
+				else if(written_bytes > 0)
+				{
+					ptr += written_bytes;
+					read_bytes -= written_bytes;
+				}
+			}
+			if(written_bytes == -1)
+				break;
 		}
-		if (nread == -1)
-		{
-			error ("read error");
-			return -1;
-		}
-		return 0;
 	}
+	close(src), close(dst);
+	return 1;
 }
+	
