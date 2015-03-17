@@ -15,33 +15,33 @@ int main (int argc, char **argv)
 	char buf[BUF_SIZE];
 	int src, dst;
 	int read_bytes, written_bytes;
-	char *postion
+	char *position;
 	char cmdline[30];
 
 	if (argc != 3)
-		printf("Usage: cmd <src> ++<dst>");
+		printf("Usage: command <src> <dst>");
 
-	if((src = open(argc[1], O_RDONLY)) == -1)		//open as a read-only
+	if((src = open(argv[1], O_RDONLY)) == -1)		//open as a read-only
 	{
 		fprintf(stderr, "open %s, error", argv[1]);
-		exit(0);
+		return 0;
 	}
-	if((dst = open(argv[2], O_RDWR | O_CREAT | O_TRUNC, 0666)) == -1)	//open as both read and write possible
+	if((dst = open(argv[2], O_RDWR | O_CREAT, S_IRUSR| S_IWUSR)) == -1)	//open as both read and write possible
 	{																	//create the file if it does not exist
 																		//cut the length of the file to zero
 																		//default access right is 0666
-		fprintf(stderr, "creat %s error", argv[2]);
-		exit(0);
+		fprintf(stderr, "creat %s error : %s", argv[2], strerror(errno));
+		return 0;
 	}
 
-	while (read_bytes = read(src, buffer, BUF_SIZE))
+	while (read_bytes = read(src, buf, BUF_SIZE))
 	{
 		if((read_bytes == -1) && (errno != EINTR))						//EINTR means an interrupt request
 			break;
 		else if(read_bytes > 0)
 		{
-			ptr = buffer;
-			while(written_bytes = write(dst, ptr, read_bytes))
+			position = buf;
+			while(written_bytes = write(dst, position, read_bytes))
 			{
 				if((written_bytes == -1) && (errno != EINTR))		
 					break;
@@ -49,7 +49,7 @@ int main (int argc, char **argv)
 					break;
 				else if(written_bytes > 0)
 				{
-					ptr += written_bytes;
+					position += written_bytes;
 					read_bytes -= written_bytes;
 				}
 			}
