@@ -12,7 +12,7 @@ gint progress_timeout(gpointer data)
 	int v;
 	char text[20] = "0%";
 
-	value = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(progress_bar)) + 0.02;
+	value = gtk_progress_bar_get_fraction(GTK_PROGRESS_BAR(progress_bar)) + 0.01;
 	if(value > 1.0)
 		value = 0.0;
 	v = (int)(value * 100);
@@ -30,7 +30,7 @@ int main (int argc, char *argv[])
 	gpointer data;
 	gtk_init(&argc, &argv);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(window), "act2");
+	gtk_window_set_title(GTK_WINDOW(window), "Swindow1");
 	gtk_widget_set_usize(window, 200,200);
 	gtk_container_set_border_width(GTK_CONTAINER(window), 5);
 	gtk_widget_show(window);
