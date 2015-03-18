@@ -1,4 +1,5 @@
 //Helloworld.c
+//gcc -o Helloworld Helloworld.c `pkg-config --cflags --libs gtk+-2.0`
 #include <gtk/gtk.h>
 
 int main(int argc,char *argv[])
