@@ -10,17 +10,17 @@ int main(void)
 {
 	if((p1 = fork()) == 0)
 	{
-		execv("./S1", NULL);
+		execv("./S1re", NULL);
 	}
 	else
 	{
 		if((p2 = fork()) == 0)
 		{
-			execv("./S2", NULL);
+			execv("./S2re", NULL);
 		}
 		else
 		{
-			execv("./S3", NULL);
+			execv("./S3re", NULL);
 		}
 	}
 	return 0;
